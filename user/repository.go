@@ -1,8 +1,6 @@
 package user
 
 import (
-	"log"
-
 	"gorm.io/gorm"
 )
 
@@ -20,9 +18,10 @@ func NewRepository(db *gorm.DB) *repository {
 	return &repository{db}
 }
 
-func (r *repository) Save(user User) {
+func (r *repository) Save(user User) (User, error) {
 	err := r.db.Create(&user).Error
 	if err != nil {
-		log.Fatal(err.Error())
+		return user, err
 	}
+	return user, nil
 }
