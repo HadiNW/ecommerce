@@ -1,9 +1,11 @@
 package main
 
 import (
+	"ecommerce/handler"
 	"ecommerce/user"
 	"log"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -17,13 +19,15 @@ func main() {
 
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo)
-	createdUser, err := userService.RegisterUser(user.RegisterInput{
-		Username: "user3",
-		Password: "qwe",
-		FullName: "User 3",
-	})
+	userHandler := handler.NewUserHandler(userService)
+
+	router := gin.Default()
+	api := router.Group("/api/v1")
+
+	api.POST("/users", userHandler.RegisterUser)
+
+	err = router.Run(":9999")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	log.Println(createdUser)
 }

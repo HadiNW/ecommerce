@@ -2,7 +2,7 @@ package user
 
 // RegisterInput ...
 type RegisterInput struct {
-	Username string
-	Password string
-	FullName string
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	FullName string `json:"full_name" binding:"required"`
 }
