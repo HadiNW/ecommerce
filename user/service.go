@@ -10,6 +10,7 @@ import (
 type Service interface {
 	RegisterUser(input RegisterInput) (User, error)
 	LoginUser(input LoginInput) (User, error)
+	CheckUsername(username string) (bool, error)
 }
 
 type service struct {
@@ -39,7 +40,7 @@ func (s *service) RegisterUser(input RegisterInput) (User, error) {
 }
 
 func (s *service) LoginUser(input LoginInput) (User, error) {
-	user, err := s.repository.Login(input)
+	user, err := s.repository.FindByUsername(input.Username)
 	if err != nil {
 		return user, err
 	}
@@ -51,4 +52,15 @@ func (s *service) LoginUser(input LoginInput) (User, error) {
 		return user, errors.New("User not found")
 	}
 	return user, nil
+}
+
+func (s *service) CheckUsername(username string) (bool, error) {
+	user, err := s.repository.FindByUsername(username)
+	if err != nil {
+		return false, err
+	}
+	if user.ID == 0 {
+		return false, nil
+	}
+	return true, nil
 }

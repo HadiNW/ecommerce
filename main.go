@@ -30,6 +30,7 @@ func main() {
 	})
 	api.POST("/users/register", userHandler.RegisterUser)
 	api.POST("/users/login", userHandler.LoginUser)
+	api.POST("/users/username-check", userHandler.CheckUsername)
 
 	err = router.Run(":9999")
 	if err != nil {
