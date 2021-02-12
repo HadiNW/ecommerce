@@ -51,6 +51,11 @@ func APIResponseUnprocessable(message string, err error) Response {
 	return APIResponseWithCode(http.StatusUnprocessableEntity, message, "Unprocessable Entity", errFormatter(err))
 }
 
+// APIResponseUnAuthorized ...
+func APIResponseUnAuthorized(message string, err error) Response {
+	return APIResponseWithCode(http.StatusUnauthorized, message, "Unauthorized", errFormatter(err))
+}
+
 func errFormatter(err error) interface{} {
 	var errors []string
 	type H map[string]interface{}

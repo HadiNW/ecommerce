@@ -4,6 +4,7 @@ import (
 	"ecommerce/handler"
 	"ecommerce/user"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -24,7 +25,11 @@ func main() {
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
-	api.POST("/users", userHandler.RegisterUser)
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "PONG")
+	})
+	api.POST("/users/register", userHandler.RegisterUser)
+	api.POST("/users/login", userHandler.LoginUser)
 
 	err = router.Run(":9999")
 	if err != nil {
