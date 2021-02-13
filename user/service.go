@@ -12,6 +12,7 @@ type Service interface {
 	LoginUser(input LoginInput) (User, error)
 	CheckUsername(username string) (bool, error)
 	UploadImage(userID int, location string) (User, error)
+	FindUserByID(userID int) (User, error)
 }
 
 type service struct {
@@ -84,5 +85,17 @@ func (s *service) UploadImage(userID int, loc string) (User, error) {
 	if err != nil {
 		return user, err
 	}
+	return user, nil
+}
+func (s *service) FindUserByID(userID int) (User, error) {
+	user, err := s.repository.FindByID(userID)
+	if err != nil {
+		return user, err
+	}
+
+	if user.ID == 0 {
+		return user, errors.New("User not found")
+	}
+
 	return user, nil
 }

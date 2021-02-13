@@ -95,7 +95,14 @@ func (h *userHanlder) UploadImage(c *gin.Context) {
 		return
 	}
 
-	userID := 1
+	decoded, ok := c.Get("user")
+	if !ok {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("User not found", err))
+		return
+	}
+
+	user := decoded.(user.User)
+	userID := user.ID
 
 	path := fmt.Sprintf("images/%d-%s", userID, img.Filename)
 

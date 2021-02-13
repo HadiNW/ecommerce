@@ -1,1 +1,6 @@
 vendor
+# exclude everything
+somefolder/*
+
+# exception to the rule
+!somefolder/.gitkeep 
