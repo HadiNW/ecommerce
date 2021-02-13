@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"ecommerce/auth"
 	"ecommerce/helper"
 	"ecommerce/user"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,11 +12,15 @@ import (
 
 type userHanlder struct {
 	userService user.Service
+	authService auth.Service
 }
 
 // NewUserHandler ...
-func NewUserHandler(userService user.Service) *userHanlder {
-	return &userHanlder{userService}
+func NewUserHandler(userService user.Service, authService auth.Service) *userHanlder {
+	return &userHanlder{
+		userService,
+		authService,
+	}
 }
 
 func (h *userHanlder) RegisterUser(c *gin.Context) {
@@ -31,7 +37,7 @@ func (h *userHanlder) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, helper.APIResponseCreated("user created", user.FormatUser(createdUser)))
+	c.JSON(http.StatusCreated, helper.APIResponseCreated("user created", user.FormatUser(createdUser, "")))
 }
 
 func (h *userHanlder) LoginUser(c *gin.Context) {
@@ -48,7 +54,13 @@ func (h *userHanlder) LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.APIResponseOK("Login Success", user.FormatUser(userData)))
+	token, err := h.authService.GenerateToken(userData.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("Bad request", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, helper.APIResponseOK("Login Success", user.FormatUser(userData, token)))
 }
 
 // CheckUsername ...
@@ -83,9 +95,11 @@ func (h *userHanlder) UploadImage(c *gin.Context) {
 		return
 	}
 
-	path := "images/" + img.Filename
+	userID := 1
 
-	_, err = h.userService.UploadImage(3, path)
+	path := fmt.Sprintf("images/%d-%s", userID, img.Filename)
+
+	_, err = h.userService.UploadImage(userID, path)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("Upload image failed", err))
 		return

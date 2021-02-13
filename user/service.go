@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"log"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -46,13 +45,16 @@ func (s *service) LoginUser(input LoginInput) (User, error) {
 	if err != nil {
 		return user, err
 	}
+
 	if user.ID == 0 {
 		return user, errors.New("User not found")
 	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 	if err != nil {
 		return user, errors.New("User not found")
 	}
+
 	return user, nil
 }
 
@@ -77,7 +79,7 @@ func (s *service) UploadImage(userID int, loc string) (User, error) {
 	}
 
 	user.Image = loc
-	log.Println(user)
+
 	user, err = s.repository.Update(userID, user)
 	if err != nil {
 		return user, err
