@@ -75,3 +75,27 @@ func (h *userHanlder) CheckUsername(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, helper.APIResponseOK(metaMsg, response))
 }
+
+func (h *userHanlder) UploadImage(c *gin.Context) {
+	img, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("Upload image failed", err))
+		return
+	}
+
+	path := "images/" + img.Filename
+
+	_, err = h.userService.UploadImage(3, path)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("Upload image failed", err))
+		return
+	}
+
+	err = c.SaveUploadedFile(img, path)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("Upload image failed", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, helper.APIResponseOK("Upload image success", map[string]interface{}{"is_uploaded": true}))
+}

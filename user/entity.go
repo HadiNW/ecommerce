@@ -8,6 +8,7 @@ type User struct {
 	Username  string
 	Password  string
 	FullName  string
+	Image     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
