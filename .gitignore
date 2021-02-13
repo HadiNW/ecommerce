@@ -1,6 +1,6 @@
 vendor
 # exclude everything
-somefolder/*
+images/*
 
 # exception to the rule
-!somefolder/.gitkeep 
+!images/.gitkeep 
