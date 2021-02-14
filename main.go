@@ -2,6 +2,7 @@ package main
 
 import (
 	"ecommerce/auth"
+	"ecommerce/campaign"
 	"ecommerce/handler"
 	"ecommerce/helper"
 	"ecommerce/user"
@@ -24,11 +25,14 @@ func main() {
 	}
 
 	userRepo := user.NewRepository(db)
+	campaignRepo := campaign.NewRepository(db)
 
 	userService := user.NewService(userRepo)
 	authService := auth.NewService()
+	campaignService := campaign.NewService(campaignRepo)
 
 	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -40,6 +44,8 @@ func main() {
 	api.POST("/users/login", userHandler.LoginUser)
 	api.POST("/users/username-check", userHandler.CheckUsername)
 	api.POST("/users/upload-image", authMiddleware(authService, userService), userHandler.UploadImage)
+
+	api.GET("/campaigns", authMiddleware(authService, userService), campaignHandler.ListCampaignByUserID)
 
 	err = router.Run(":9999")
 	if err != nil {
