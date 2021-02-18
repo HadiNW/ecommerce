@@ -6,6 +6,7 @@ import (
 	"ecommerce/user"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ func NewCampaignHandler(campaignService campaign.Service) *campaignHandler {
 	return &campaignHandler{campaignService}
 }
 
-func (h *campaignHandler) ListCampaignByUserID(c *gin.Context) {
+func (h *campaignHandler) ListMyCampaign(c *gin.Context) {
 	decoded, ok := c.Get("user")
 	if !ok {
 		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("User not found", errors.New("User not found")))
@@ -31,5 +32,25 @@ func (h *campaignHandler) ListCampaignByUserID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("List campaign failed", err))
 		return
 	}
-	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaigns))
+	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaign(campaigns)))
+}
+
+func (h *campaignHandler) ListCampaign(c *gin.Context) {
+	userIDStr := c.Query("user_id")
+	var userID int
+	if userIDStr != "" {
+		ID, err := strconv.Atoi(userIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("error", err))
+			return
+		}
+		userID = ID
+	}
+
+	campaigns, err := h.campaignService.ListCampaign(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("List campaign failed", err))
+		return
+	}
+	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaign(campaigns)))
 }

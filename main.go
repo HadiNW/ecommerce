@@ -45,7 +45,8 @@ func main() {
 	api.POST("/users/username-check", userHandler.CheckUsername)
 	api.POST("/users/upload-image", authMiddleware(authService, userService), userHandler.UploadImage)
 
-	api.GET("/campaigns", authMiddleware(authService, userService), campaignHandler.ListCampaignByUserID)
+	api.GET("/my-campaigns", authMiddleware(authService, userService), campaignHandler.ListMyCampaign)
+	api.GET("/campaigns", campaignHandler.ListCampaign)
 
 	err = router.Run(":9999")
 	if err != nil {

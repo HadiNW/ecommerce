@@ -18,7 +18,7 @@ func NewRepository(db *gorm.DB) *repository {
 func (r *repository) ListCampaign() ([]Campaign, error) {
 	var campaigns []Campaign
 
-	err := r.db.Find(&campaigns).Error
+	err := r.db.Preload("Images", "is_primary = 1").Find(&campaigns).Error
 	if err != nil {
 		return campaigns, err
 	}
@@ -29,7 +29,7 @@ func (r *repository) ListCampaign() ([]Campaign, error) {
 func (r *repository) ListCampaignByUserID(userID int) ([]Campaign, error) {
 	var campaigns []Campaign
 
-	err := r.db.Where("user_id = ?", userID).Find(&campaigns).Error
+	err := r.db.Where("user_id = ?", userID).Preload("Images", "is_primary = 1").Find(&campaigns).Error
 	if err != nil {
 		return campaigns, err
 	}
