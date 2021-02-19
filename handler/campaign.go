@@ -54,3 +54,19 @@ func (h *campaignHandler) ListCampaign(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaign(campaigns)))
 }
+
+func (h *campaignHandler) GetCampaignByID(c *gin.Context) {
+	strID := c.Param("id")
+	ID, err := strconv.Atoi(strID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("error", err))
+		return
+	}
+
+	data, err := h.campaignService.GetCampaignByID(ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("error", err))
+		return
+	}
+	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaignDetail(data)))
+}
