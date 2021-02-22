@@ -1,11 +1,19 @@
 package campaign
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"math/rand"
+	"time"
+
+	"github.com/gosimple/slug"
+)
 
 type Service interface {
 	ListCampaignByUserID(userID int) ([]Campaign, error)
 	ListCampaign(userID int) ([]Campaign, error)
 	GetCampaignByID(ID int) (Campaign, error)
+	CreateCampaign(campaign CreateCampaignPayload, userID int) (Campaign, error)
 }
 
 type service struct {
@@ -49,4 +57,27 @@ func (s *service) GetCampaignByID(ID int) (Campaign, error) {
 	}
 
 	return campaign, nil
+}
+
+func (s *service) CreateCampaign(input CreateCampaignPayload, userID int) (Campaign, error) {
+	var data Campaign
+
+	data.Name = input.Name
+	data.Description = input.Description
+	data.ShortDescription = input.ShortDescription
+	data.Perks = input.Perks
+	data.GoalAmount = input.GoalAmount
+	data.UserID = userID
+	rand.Seed(time.Now().UnixNano())
+	data.Slug = slug.Make(fmt.Sprintf("%s-%d-%d", data.Name, userID, (1 + rand.Intn(999-1))))
+
+	campaign, err := s.repository.CreateCampaign(data)
+	if err != nil {
+		return campaign, err
+	}
+	return campaign, nil
+}
+
+func (s *service) UpdateCampaign(input UpdateCampaignPayload) (Campaign, error) {
+
 }

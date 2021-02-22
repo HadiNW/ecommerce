@@ -62,6 +62,9 @@ func errFormatter(err error) interface{} {
 
 	_, ok := err.(validator.ValidationErrors)
 	if !ok {
+		if err == nil {
+			return nil
+		}
 		errors = append(errors, err.Error())
 		return H{"errors": errors}
 	}

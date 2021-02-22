@@ -1,11 +1,15 @@
 package campaign
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	ListCampaign() ([]Campaign, error)
 	ListCampaignByUserID(userID int) ([]Campaign, error)
 	GetCampaignByID(campaignID int) (Campaign, error)
+	CreateCampaign(campaign Campaign) (Campaign, error)
+	UpdateCampaign(campaign Campaign) (Campaign, error)
 }
 
 type repository struct {
@@ -46,5 +50,21 @@ func (r *repository) GetCampaignByID(ID int) (Campaign, error) {
 		return campaign, err
 	}
 
+	return campaign, nil
+}
+
+func (r *repository) CreateCampaign(campaign Campaign) (Campaign, error) {
+	err := r.db.Create(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
+	return campaign, nil
+}
+
+func (r *repository) UpdateCampaign(campaign Campaign) (Campaign, error) {
+	err := r.db.Save(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
 	return campaign, nil
 }

@@ -32,7 +32,7 @@ func (h *campaignHandler) ListMyCampaign(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("List campaign failed", err))
 		return
 	}
-	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaign(campaigns)))
+	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaigns(campaigns)))
 }
 
 func (h *campaignHandler) ListCampaign(c *gin.Context) {
@@ -52,7 +52,7 @@ func (h *campaignHandler) ListCampaign(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("List campaign failed", err))
 		return
 	}
-	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaign(campaigns)))
+	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaigns(campaigns)))
 }
 
 func (h *campaignHandler) GetCampaignByID(c *gin.Context) {
@@ -69,4 +69,28 @@ func (h *campaignHandler) GetCampaignByID(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, helper.APIResponseOK("success", campaign.FormatCampaignDetail(data)))
+}
+
+func (h *campaignHandler) CreateCampaign(c *gin.Context) {
+	input := campaign.CreateCampaignPayload{}
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("Malformat JSON", err))
+		return
+	}
+
+	decoded, ok := c.Get("user")
+	if !ok {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("User not found", errors.New("User not found")))
+		return
+	}
+
+	user := decoded.(user.User)
+
+	createdCampaign, err := h.campaignService.CreateCampaign(input, user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("error", err))
+		return
+	}
+	c.JSON(http.StatusOK, helper.APIResponseOK("error", campaign.FormatCampaign(createdCampaign)))
 }

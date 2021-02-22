@@ -39,30 +39,33 @@ type CampaignUserResponse struct {
 	Name string `json:"name"`
 }
 
-func FormatCampaign(campaigns []Campaign) []CampaignResponse {
-	res := []CampaignResponse{}
+func FormatCampaign(campaign Campaign) CampaignResponse {
+	res := CampaignResponse{}
+	res.ID = campaign.ID
+	res.Name = campaign.Name
+	res.ShortDescription = campaign.ShortDescription
+	res.Description = campaign.Description
+	res.Perks = campaign.Perks
+	res.BackerCount = campaign.BackerCount
+	res.GoalAmount = campaign.GoalAmount
+	res.CurrentAmount = campaign.CurrentAmount
+	res.Slug = campaign.Slug
+	res.UserID = campaign.UserID
 
-	for _, c := range campaigns {
-		var imageURL string
-		if len(c.Images) > 0 {
-			imageURL = c.Images[0].FileName
+	for _, img := range campaign.Images {
+		if img.IsPrimary == 1 {
+			res.ImageURL = img.FileName
 		}
-		d := CampaignResponse{
-			ID:               c.ID,
-			UserID:           c.UserID,
-			Name:             c.Name,
-			ShortDescription: c.ShortDescription,
-			Description:      c.Description,
-			Perks:            c.Perks,
-			BackerCount:      c.BackerCount,
-			GoalAmount:       c.GoalAmounnt,
-			CurrentAmount:    c.CurrentAmount,
-			Slug:             c.Slug,
-			ImageURL:         imageURL,
-		}
-		res = append(res, d)
 	}
+	return res
+}
 
+func FormatCampaigns(campaigns []Campaign) []CampaignResponse {
+	res := []CampaignResponse{}
+	for _, c := range campaigns {
+		campaign := FormatCampaign(c)
+		res = append(res, campaign)
+	}
 	return res
 }
 
@@ -74,7 +77,7 @@ func FormatCampaignDetail(c Campaign) CampaignDetailResponse {
 	d.Description = c.Description
 	d.Perks = c.Perks
 	d.BackerCount = c.BackerCount
-	d.GoalAmount = c.GoalAmounnt
+	d.GoalAmount = c.GoalAmount
 	d.CurrentAmount = c.CurrentAmount
 	d.Slug = c.Slug
 
