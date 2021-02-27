@@ -49,6 +49,7 @@ func main() {
 	api.GET("/campaigns", campaignHandler.ListCampaign)
 	api.GET("/campaigns/:id", campaignHandler.GetCampaignByID)
 	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign)
+	api.PUT("/campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign)
 
 	err = router.Run(":9999")
 	if err != nil {

@@ -94,3 +94,29 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, helper.APIResponseOK("error", campaign.FormatCampaign(createdCampaign)))
 }
+
+func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
+	strID := c.Param("id")
+	campaignID, err := strconv.Atoi(strID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("error", err))
+		return
+	}
+
+	currentUser := c.MustGet("user").(user.User)
+
+	var payload campaign.UpdateCampaignPayload
+	err = c.ShouldBindJSON(&payload)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("error", err))
+		return
+	}
+
+	data, err := h.campaignService.UpdateCampaign(payload, campaignID, currentUser.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helper.APIResponseBadRequest("error", err))
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, helper.APIResponseOK("error", data))
+}

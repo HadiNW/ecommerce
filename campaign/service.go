@@ -14,6 +14,7 @@ type Service interface {
 	ListCampaign(userID int) ([]Campaign, error)
 	GetCampaignByID(ID int) (Campaign, error)
 	CreateCampaign(campaign CreateCampaignPayload, userID int) (Campaign, error)
+	UpdateCampaign(input UpdateCampaignPayload, campaignID int, userID int) (Campaign, error)
 }
 
 type service struct {
@@ -78,6 +79,29 @@ func (s *service) CreateCampaign(input CreateCampaignPayload, userID int) (Campa
 	return campaign, nil
 }
 
-func (s *service) UpdateCampaign(input UpdateCampaignPayload) (Campaign, error) {
+func (s *service) UpdateCampaign(input UpdateCampaignPayload, campaignID int, userID int) (Campaign, error) {
+	data, err := s.repository.GetCampaignByID(campaignID)
+	if err != nil {
+		return data, err
+	}
 
+	if data.ID == 0 {
+		return data, errors.New("campaign not found")
+	}
+
+	if data.UserID != userID {
+		return data, errors.New("Not Authorized")
+	}
+
+	data.Name = input.Name
+	data.ShortDescription = input.ShortDescription
+	data.Description = input.Description
+	data.Perks = input.Perks
+	data.GoalAmount = input.GoalAmount
+	data.ID = campaignID
+	c, err := s.repository.UpdateCampaign(data)
+	if err != nil {
+		return c, err
+	}
+	return c, nil
 }
