@@ -11,8 +11,14 @@ type CustomerResponse struct {
 	FullName string `json:"full_name"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Token    string `json:"token,omitempty"`
 	Avatar   string `json:"avatar"`
 	Status   bool   `json:"status"`
+}
+
+type CustomerLoginPayload struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 func MarshalResponse(customer Customer) CustomerResponse {
@@ -26,4 +32,8 @@ func MarshalResponse(customer Customer) CustomerResponse {
 	r.Status = customer.Status
 
 	return r
+}
+
+func (c *CustomerResponse) SetToken(token string) {
+	c.Token = token
 }

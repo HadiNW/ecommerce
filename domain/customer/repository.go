@@ -1,6 +1,8 @@
 package customer
 
 import (
+	"database/sql"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -8,6 +10,7 @@ type Repository interface {
 	Create(customer CustomerRegisterPayload) (Customer, error)
 	FindByID(int) (Customer, error)
 	FindAll() ([]Customer, error)
+	FindByEmail(string) (Customer, error)
 }
 
 type repository struct {
@@ -22,10 +25,32 @@ func (r *repository) FindByID(ID int) (Customer, error) {
 	customerScan := CustomerScan{}
 	customer := Customer{}
 
-	query := "SELECT id, full_name, email, username, avatar, status, created_at, updated_at FROM customer WHERE id = ?"
+	query := "SELECT id, full_name, email, username, avatar, status, password, created_at, updated_at FROM customer WHERE id = ?"
 
 	err := r.db.Get(&customerScan, query, ID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return Customer{}, nil
+		}
+		return customer, err
+	}
+
+	customer.FromScan(customerScan)
+
+	return customer, nil
+}
+
+func (r *repository) FindByEmail(email string) (Customer, error) {
+	customerScan := CustomerScan{}
+	customer := Customer{}
+
+	query := "SELECT id, full_name, email, username, avatar, status, password, created_at, updated_at FROM customer WHERE email = ?"
+
+	err := r.db.Get(&customerScan, query, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return Customer{}, nil
+		}
 		return customer, err
 	}
 
