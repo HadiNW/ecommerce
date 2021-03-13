@@ -3,14 +3,17 @@ package order
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type Repository interface {
 	Create(order Order) (Order, error)
+	UpdateQty(order Order) (Order, error)
 	FindOrderByID(ID int) (Order, error)
 	GetCartByCustomer(customerID int) ([]Order, error)
+	GetOrderByProductAndCustomer(int, int) (Order, error)
 }
 
 type repository struct {
@@ -55,19 +58,49 @@ func (r *repository) Create(order Order) (Order, error) {
 	}
 
 	createdOrder, err = r.FindOrderByID(int(orderID))
+	if err != nil {
+		return createdOrder, err
+	}
 
 	return createdOrder, nil
 }
 
+func (r *repository) UpdateQty(order Order) (Order, error) {
+	udpatedOrder := Order{}
+
+	fmt.Printf("%+v\n", order)
+	// Begin transaction
+	tx := r.db.MustBegin()
+
+	query := "UPDATE `order` SET qty = ? WHERE id = ?"
+
+	tx.MustExec(query, order.Qty, order.ID)
+
+	err := tx.Commit()
+	if err != nil {
+		return udpatedOrder, err
+	}
+
+	udpatedOrder, err = r.FindOrderByID(order.ID)
+	if err != nil {
+		return udpatedOrder, err
+	}
+	log.Println(udpatedOrder, "ORRR")
+
+	return udpatedOrder, nil
+}
+
 func (r *repository) FindOrderByID(ID int) (Order, error) {
 	var order Order
-	err := r.db.Get(&order, "SELECT id, product_id, cart_id, customer_id, price, qty, status, created_at, updated_at WHERE id = ?", ID)
+	var orderScan OrderScan
+	err := r.db.Get(&orderScan, "SELECT id, product_id, cart_id, customer_id, price, qty, status, created_at, updated_at FROM `order` WHERE id = ?", ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return order, nil
 		}
 		return order, err
 	}
+	order.FromScan(orderScan)
 	return order, nil
 }
 
@@ -93,4 +126,24 @@ func (r *repository) GetCartByCustomer(customerID int) ([]Order, error) {
 	}
 
 	return orders, nil
+}
+
+func (r *repository) GetOrderByProductAndCustomer(custID int, productID int) (Order, error) {
+	var orderScan OrderScan
+	var order Order
+
+	err := r.db.Get(&orderScan, "SELECT * FROM `order` WHERE customer_id = ? AND product_id = ?", custID, productID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return order, nil
+		}
+		return order, err
+	}
+
+	fmt.Printf("%+v\n", orderScan)
+
+	order.FromScan(orderScan)
+	fmt.Printf("%+v\n", order)
+
+	return order, nil
 }

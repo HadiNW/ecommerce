@@ -17,6 +17,21 @@ type ProductResponse struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
+type PaginationPayload struct {
+	Page  int `json:"page"`
+	Limit int `json:"limit"`
+}
+
+type ProductParam struct {
+	Page     int    `json:"page" form:"page"`
+	Limit    int    `json:"limit" form:"limit"`
+	Offset   int    `json:"offset" form:"offset"`
+	Search   string `json:"search" form:"search"`
+	OrderBy  string `json:"order_by" form:"order"`
+	Sort     string `json:"sort" form:"sort"`
+	Category int    `json:"category" form:"category"`
+}
+
 func MarshalProduct(p Product) ProductResponse {
 	r := ProductResponse{}
 

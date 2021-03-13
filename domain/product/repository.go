@@ -2,12 +2,17 @@ package product
 
 import (
 	"database/sql"
+	"ecommerce-api/pkg/utils"
+	"fmt"
+	"log"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type Repository interface {
 	FindProductByID(ID int) (Product, error)
+	FindAll(param ProductParam) ([]Product, error)
 }
 
 type repository struct {
@@ -34,4 +39,56 @@ func (r *repository) FindProductByID(ID int) (Product, error) {
 	product.FromScan(productScan)
 
 	return product, nil
+}
+
+func (r *repository) FindAll(param ProductParam) ([]Product, error) {
+	productScan := []ProductScan{}
+	products := []Product{}
+
+	query := "SELECT * FROM product"
+	condition := []string{}
+
+	q, cond := utils.Paginate(utils.Pagination{
+		Limit:   param.Limit,
+		Offset:  param.Offset,
+		OrderBy: param.OrderBy,
+		Sort:    param.Sort,
+		Search:  param.Search,
+	})
+	if param.Category != 0 {
+		condition = append(condition, "category_id = :category")
+	}
+
+	if cond != "" {
+		condition = append(condition, cond)
+	}
+
+	if len(condition) > 0 {
+		query += fmt.Sprintf(" WHERE %s", strings.Join(condition, " AND "))
+	}
+
+	query += q
+
+	rows, err := r.db.NamedQuery(query, param)
+	if err != nil {
+		log.Println(err)
+		return products, err
+	}
+
+	for rows.Next() {
+		scan := ProductScan{}
+		err := rows.StructScan(&scan)
+		if err != nil {
+			return products, err
+		}
+		productScan = append(productScan, scan)
+	}
+
+	for _, p := range productScan {
+		var product Product
+		product.FromScan(p)
+		products = append(products, product)
+	}
+
+	return products, nil
 }

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"ecommerce-api/auth"
+	"ecommerce-api/domain/auth"
 	"ecommerce-api/domain/customer"
 	"ecommerce-api/domain/order"
 	"ecommerce-api/pkg/api"

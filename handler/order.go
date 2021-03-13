@@ -5,7 +5,6 @@ import (
 	"ecommerce-api/domain/product"
 	"ecommerce-api/pkg/api"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,24 +49,5 @@ func (h *orderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, api.ResponseOK(data, "success"))
-}
-
-func (h *orderHandler) GetProductByID(c *gin.Context) {
-
-	IDstr := c.Param("id")
-
-	ID, err := strconv.Atoi(IDstr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, api.ResponseBadRequest(err, "Error"))
-		return
-	}
-
-	data, err := h.productService.GetProductByID(ID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, api.ResponseBadRequest(err, "Error"))
-		return
-	}
-
-	c.JSON(http.StatusOK, api.ResponseOK(product.MarshalProduct(data), "success"))
+	c.JSON(http.StatusOK, api.ResponseOK(order.MarshalOrder(data), "success"))
 }

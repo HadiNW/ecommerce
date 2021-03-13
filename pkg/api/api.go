@@ -12,8 +12,15 @@ type Meta struct {
 }
 
 type Response struct {
-	Meta Meta        `json:"meta"`
-	Data interface{} `json:"data"`
+	Meta       Meta        `json:"meta"`
+	Data       interface{} `json:"data"`
+	Pagination interface{} `json:"pagination,omitempty"`
+}
+
+type Pagination struct {
+	Page   int `json:"page" form:"page"`
+	Limit  int `json:"limit" form:"limit"`
+	Offset int `json:"offset" form:"offset"`
 }
 
 func ResponseOK(data interface{}, message string) Response {
@@ -24,6 +31,18 @@ func ResponseOK(data interface{}, message string) Response {
 			Error:   false,
 		},
 		Data: data,
+	}
+}
+
+func ResponseOKPagination(data interface{}, pagination interface{}, message string) Response {
+	return Response{
+		Meta: Meta{
+			Message: message,
+			Code:    200,
+			Error:   false,
+		},
+		Data:       data,
+		Pagination: &pagination,
 	}
 }
 

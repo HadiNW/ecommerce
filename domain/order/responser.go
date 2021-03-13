@@ -3,14 +3,15 @@ package order
 import "time"
 
 type OrderResponse struct {
-	ID        int       `json:"id"`
-	ProductID int       `json:"product_id"`
-	CartID    int       `json:"cart_id"`
-	Price     int       `json:"price"`
-	Qty       int       `json:"qty"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID         int       `json:"id"`
+	ProductID  int       `json:"product_id"`
+	CartID     int       `json:"cart_id"`
+	CustomerID int       `json:"customer_id"`
+	Price      int       `json:"price"`
+	Qty        int       `json:"qty"`
+	Status     string    `json:"status"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type OrderCreatePayload struct {
@@ -25,6 +26,7 @@ func MarshalOrder(o Order) OrderResponse {
 	r.ID = o.ID
 	r.ProductID = o.ProductID
 	r.CartID = o.CartID
+	r.CustomerID = o.CustomerID
 	r.Price = o.Price
 	r.Qty = o.Qty
 	r.Status = o.Status

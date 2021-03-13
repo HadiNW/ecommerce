@@ -48,6 +48,7 @@ func (o *Order) FromScan(s OrderScan) {
 	o.ID = int(s.ID.Int64)
 	o.ProductID = int(s.ProductID.Int64)
 	o.CartID = int(s.CartID.Int64)
+	o.CustomerID = int(s.CustomerID.Int64)
 	o.Price = int(s.Price.Int64)
 	o.Qty = int(s.Qty.Int64)
 	o.Status = s.Status.String

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ecommerce-api/auth"
 	"ecommerce-api/database"
+	"ecommerce-api/domain/auth"
 	"ecommerce-api/domain/customer"
 	"ecommerce-api/domain/order"
 	"ecommerce-api/domain/product"
@@ -35,6 +35,7 @@ func main() {
 
 	custHandler := handler.NewCustomerHandler(custService, authService, orderService)
 	orderHandler := handler.NewOrderHandler(orderService, productService)
+	productHandler := handler.NewProductHandler(productService)
 
 	api.GET("/customers", custHandler.ListCustomer)
 	api.GET("/customers/:id", custHandler.GetCustomer)
@@ -43,7 +44,9 @@ func main() {
 
 	api.GET("/carts", middleware(custService, authService), orderHandler.GetCart)
 	api.POST("/carts", middleware(custService, authService), orderHandler.CreateOrder)
-	api.GET("/products/:id", orderHandler.GetProductByID)
+
+	api.GET("/products", productHandler.ListProduct)
+	api.GET("/products/:id", productHandler.GetProductByID)
 
 	err := r.Run(":9999")
 	if err != nil {
