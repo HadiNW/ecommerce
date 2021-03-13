@@ -18,7 +18,7 @@ type Response struct {
 }
 
 type Pagination struct {
-	Page   int `json:"page" form:"page"`
+	Total  int `json:"total" form:"total"`
 	Limit  int `json:"limit" form:"limit"`
 	Offset int `json:"offset" form:"offset"`
 }

@@ -50,11 +50,11 @@ func (h *productHandler) ListProduct(c *gin.Context) {
 		params.Search = "%" + params.Search + "%"
 	}
 
-	products, err := h.productService.ListProduct(params)
+	products, paginnation, err := h.productService.ListProduct(params)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, api.ResponseBadRequest(err, "error"))
 		return
 	}
 
-	c.JSON(http.StatusOK, api.ResponseOKPagination(products, nil, "List products success"))
+	c.JSON(http.StatusOK, api.ResponseOKPagination(products, paginnation, "List products success"))
 }

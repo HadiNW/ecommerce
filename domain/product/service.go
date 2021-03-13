@@ -1,10 +1,13 @@
 package product
 
-import "errors"
+import (
+	"ecommerce-api/pkg/api"
+	"errors"
+)
 
 type Service interface {
 	GetProductByID(int) (Product, error)
-	ListProduct(param ProductParam) ([]Product, error)
+	ListProduct(param ProductParam) ([]Product, *api.Pagination, error)
 }
 
 type service struct {
@@ -26,11 +29,11 @@ func (s *service) GetProductByID(ID int) (Product, error) {
 	}
 	return product, nil
 }
-func (s *service) ListProduct(param ProductParam) ([]Product, error) {
-	products, err := s.productRepo.FindAll(param)
+func (s *service) ListProduct(param ProductParam) ([]Product, *api.Pagination, error) {
+	products, pagination, err := s.productRepo.FindAll(param)
 	if err != nil {
-		return products, err
+		return products, pagination, err
 	}
 
-	return products, nil
+	return products, pagination, nil
 }

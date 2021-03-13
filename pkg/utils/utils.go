@@ -3,7 +3,7 @@ package utils
 import "fmt"
 
 type Pagination struct {
-	Page    int    `json:"page" form:"page"`
+	Total   int    `json:"total_page" form:"total"`
 	Limit   int    `json:"limit" form:"limit"`
 	Offset  int    `json:"offset" form:"offset"`
 	Search  string `json:"search" form:"search"`
