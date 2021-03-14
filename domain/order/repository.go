@@ -14,6 +14,7 @@ type Repository interface {
 	FindOrderByID(ID int) (Order, error)
 	GetCartByCustomer(customerID int) ([]Order, error)
 	GetOrderByProductAndCustomer(int, int) (Order, error)
+	FindOrderByIDs(IDs []int) ([]Order, error)
 }
 
 type repository struct {
@@ -102,6 +103,29 @@ func (r *repository) FindOrderByID(ID int) (Order, error) {
 	}
 	order.FromScan(orderScan)
 	return order, nil
+}
+
+func (r *repository) FindOrderByIDs(IDs []int) ([]Order, error) {
+	var orders []Order
+	var orderScans []OrderScan
+	query := "SELECT id, product_id, cart_id, customer_id, price, qty, status, created_at, updated_at FROM `order` WHERE id IN (?) AND status = 'ACTIVE'"
+	query, args, err := sqlx.In(query, IDs)
+	if err != nil {
+		return orders, err
+	}
+
+	err = r.db.Select(&orderScans, query, args...)
+	if err != nil {
+		return orders, err
+	}
+
+	for _, os := range orderScans {
+		o := Order{}
+		o.FromScan(os)
+		orders = append(orders, o)
+	}
+
+	return orders, nil
 }
 
 func (r *repository) GetCartByCustomer(customerID int) ([]Order, error) {
