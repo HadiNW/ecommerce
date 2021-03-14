@@ -3,7 +3,6 @@ package order
 import (
 	"ecommerce-api/domain/product"
 	"errors"
-	"log"
 )
 
 type Service interface {
@@ -48,6 +47,8 @@ func (s *service) CreateOrder(payload OrderCreatePayload) (Order, error) {
 	}
 
 	order.Price = p.Price
+	order.Discount = p.Discount
+	order.PriceDiscount = p.Price - (p.Price * p.Discount / 100)
 
 	mustAddQty, o, err := s.mustAddQty(order.CustomerID, order.ProductID)
 	if err != nil {
@@ -58,7 +59,7 @@ func (s *service) CreateOrder(payload OrderCreatePayload) (Order, error) {
 		// Update qty on order data
 		order.Qty = o.Qty + payload.Qty
 		order.ID = o.ID
-		log.Println("add qty ")
+
 		updated, err := s.orderRepo.UpdateQty(order)
 		if err != nil {
 			return updated, err

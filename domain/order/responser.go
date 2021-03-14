@@ -1,17 +1,22 @@
 package order
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 type OrderResponse struct {
-	ID         int       `json:"id"`
-	ProductID  int       `json:"product_id"`
-	CartID     int       `json:"cart_id"`
-	CustomerID int       `json:"customer_id"`
-	Price      int       `json:"price"`
-	Qty        int       `json:"qty"`
-	Status     string    `json:"status"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID            int       `json:"id"`
+	ProductID     int       `json:"product_id"`
+	CartID        int       `json:"cart_id"`
+	CustomerID    int       `json:"customer_id"`
+	Price         float64   `json:"price"`
+	PriceDiscount float64   `json:"price_discount"`
+	Qty           int       `json:"qty"`
+	Discount      float64   `json:"discount"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type OrderCreatePayload struct {
@@ -28,7 +33,9 @@ func MarshalOrder(o Order) OrderResponse {
 	r.CartID = o.CartID
 	r.CustomerID = o.CustomerID
 	r.Price = o.Price
+	r.PriceDiscount = o.PriceDiscount
 	r.Qty = o.Qty
+	r.Discount = o.Discount
 	r.Status = o.Status
 	r.CreatedAt = o.CreatedAt
 	r.UpdatedAt = o.UpdatedAt
@@ -39,9 +46,13 @@ func MarshalOrder(o Order) OrderResponse {
 func MarshalOrders(orders []Order) []OrderResponse {
 	r := []OrderResponse{}
 
+	log.Println("marshal order ini")
+
 	for _, o := range orders {
 		data := MarshalOrder(o)
 		r = append(r, data)
+
+		log.Println(data, "DATAAA")
 	}
 
 	return r

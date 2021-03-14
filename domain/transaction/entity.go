@@ -49,13 +49,21 @@ type TransactionDetailScan struct {
 }
 
 func (t *Transaction) FromScan(s TransactionScan) {
-	t.ID = int(s.CustomerID.Int64)
+	t.ID = int(s.ID.Int64)
 	t.CustomerID = int(s.CustomerID.Int64)
 	t.Total = int(s.Total.Int64)
 	t.PaidAt = s.PaidAt.Time
 	t.PaymentURL = s.PaymentURL.String
 	t.PaymentMethod = s.PaymentMethod.String
 	t.Status = s.PaymentURL.String
+	t.CreatedAt = s.CreatedAt.Time
+	t.UpdatedAt = s.UpdatedAt.Time
+}
+
+func (t *TransactionDetail) FromScan(s TransactionDetailScan) {
+	t.ID = int(s.ID.Int64)
+	t.TransactionID = int(s.TransactionID.Int64)
+	t.OrderID = int(s.OrderID.Int64)
 	t.CreatedAt = s.CreatedAt.Time
 	t.UpdatedAt = s.UpdatedAt.Time
 }

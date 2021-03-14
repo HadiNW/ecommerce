@@ -6,15 +6,17 @@ import (
 )
 
 type Order struct {
-	ID         int       `db:"id"`
-	ProductID  int       `db:"product_id"`
-	CartID     int       `db:"cart_id"`
-	CustomerID int       `db:"customer_id"`
-	Price      int       `db:"price"`
-	Qty        int       `db:"qty"`
-	Status     string    `db:"status"`
-	CreatedAt  time.Time `db:"created_at"`
-	UpdatedAt  time.Time `db:"updated_at"`
+	ID            int       `db:"id"`
+	ProductID     int       `db:"product_id"`
+	CartID        int       `db:"cart_id"`
+	CustomerID    int       `db:"customer_id"`
+	Price         float64   `db:"price"`
+	Discount      float64   `db:"discount"`
+	PriceDiscount float64   `db:"price_discount"`
+	Qty           int       `db:"qty"`
+	Status        string    `db:"status"`
+	CreatedAt     time.Time `db:"created_at"`
+	UpdatedAt     time.Time `db:"updated_at"`
 }
 
 type Cart struct {
@@ -26,15 +28,17 @@ type Cart struct {
 }
 
 type OrderScan struct {
-	ID         sql.NullInt64  `db:"id"`
-	ProductID  sql.NullInt64  `db:"product_id"`
-	CustomerID sql.NullInt64  `db:"customer_id"`
-	CartID     sql.NullInt64  `db:"cart_id"`
-	Price      sql.NullInt64  `db:"price"`
-	Qty        sql.NullInt64  `db:"qty"`
-	Status     sql.NullString `db:"status"`
-	CreatedAt  sql.NullTime   `db:"created_at"`
-	UpdatedAt  sql.NullTime   `db:"updated_at"`
+	ID            sql.NullInt64   `db:"id"`
+	ProductID     sql.NullInt64   `db:"product_id"`
+	CustomerID    sql.NullInt64   `db:"customer_id"`
+	CartID        sql.NullInt64   `db:"cart_id"`
+	Price         sql.NullFloat64 `db:"price"`
+	PriceDiscount sql.NullFloat64 `db:"price_discount"`
+	Discount      sql.NullFloat64 `db:"discount"`
+	Qty           sql.NullInt64   `db:"qty"`
+	Status        sql.NullString  `db:"status"`
+	CreatedAt     sql.NullTime    `db:"created_at"`
+	UpdatedAt     sql.NullTime    `db:"updated_at"`
 }
 
 type CartScan struct {
@@ -49,8 +53,10 @@ func (o *Order) FromScan(s OrderScan) {
 	o.ProductID = int(s.ProductID.Int64)
 	o.CartID = int(s.CartID.Int64)
 	o.CustomerID = int(s.CustomerID.Int64)
-	o.Price = int(s.Price.Int64)
+	o.Price = s.Price.Float64
+	o.PriceDiscount = s.PriceDiscount.Float64
 	o.Qty = int(s.Qty.Int64)
+	o.Discount = s.Discount.Float64
 	o.Status = s.Status.String
 	o.CreatedAt = s.CreatedAt.Time
 	o.UpdatedAt = s.UpdatedAt.Time

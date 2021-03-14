@@ -53,6 +53,7 @@ func main() {
 	api.GET("/products/:id", productHandler.GetProductByID)
 
 	api.POST("/checkout", middleware(custService, authService), transactionHandler.Checkout)
+	api.GET("/transactions", middleware(custService, authService), transactionHandler.GetCustomerTransaction)
 
 	err := r.Run(":9999")
 	if err != nil {

@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"ecommerce-api/domain/order"
-	"log"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -10,6 +9,8 @@ import (
 type Repository interface {
 	Create(orders []order.Order, custID int) (Transaction, error)
 	FindByID(ID int) (Transaction, error)
+	GetCustomerTransactions(ID int) ([]Transaction, error)
+	GetTransactionDetails(transactionID int) ([]TransactionDetail, error)
 }
 
 type repository struct {
@@ -28,9 +29,9 @@ func (r *repository) Create(orders []order.Order, custID int) (Transaction, erro
 		return Transaction{}, err
 	}
 
-	var total int
+	var total float64
 	for _, order := range orders {
-		total += (order.Price * order.Qty)
+		total += (order.PriceDiscount * float64(order.Qty))
 	}
 
 	res, err := tx.Exec(query, custID, total)
@@ -58,7 +59,7 @@ func (r *repository) Create(orders []order.Order, custID int) (Transaction, erro
 	}
 
 	query = "UPDATE `order` SET status = 'CHECKED_OUT' WHERE id = ?"
-	log.Println(query, "qq")
+
 	for _, order := range orders {
 		_, err = tx.Exec(query, order.ID)
 		if err != nil {
@@ -90,4 +91,44 @@ func (r *repository) FindByID(ID int) (Transaction, error) {
 	trx.FromScan(trxScan)
 
 	return trx, nil
+}
+
+func (r *repository) GetCustomerTransactions(ID int) ([]Transaction, error) {
+	trxScan := []TransactionScan{}
+	trx := []Transaction{}
+
+	err := r.db.Select(&trxScan, "SELECT * FROM transaction WHERE customer_id = ?", ID)
+	if err != nil {
+		return trx, err
+	}
+
+	for _, scan := range trxScan {
+		t := Transaction{}
+
+		t.FromScan(scan)
+
+		trx = append(trx, t)
+	}
+
+	return trx, nil
+}
+
+func (r *repository) GetTransactionDetails(transactionID int) ([]TransactionDetail, error) {
+	scans := []TransactionDetailScan{}
+	details := []TransactionDetail{}
+
+	err := r.db.Select(&scans, "SELECT * FROM transaction_detail WHERE transaction_id = ? ", transactionID)
+	if err != nil {
+		return details, err
+	}
+
+	for _, scan := range scans {
+		detail := TransactionDetail{}
+
+		detail.FromScan(scan)
+
+		details = append(details, detail)
+	}
+
+	return details, nil
 }

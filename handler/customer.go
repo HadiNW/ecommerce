@@ -5,7 +5,6 @@ import (
 	"ecommerce-api/domain/customer"
 	"ecommerce-api/domain/order"
 	"ecommerce-api/pkg/api"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -74,12 +73,9 @@ func (h *customerHandler) LoginCustomer(c *gin.Context) {
 func (h *customerHandler) ListCustomer(c *gin.Context) {
 	data, err := h.custService.ListCustomer()
 	if err != nil {
-		log.Println("huahahah 3")
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
-
-	log.Println("huahahah")
 
 	c.JSON(http.StatusOK, data)
 }

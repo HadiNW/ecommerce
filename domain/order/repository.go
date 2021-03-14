@@ -3,7 +3,6 @@ package order
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -14,7 +13,7 @@ type Repository interface {
 	FindOrderByID(ID int) (Order, error)
 	GetCartByCustomer(customerID int) ([]Order, error)
 	GetOrderByProductAndCustomer(int, int) (Order, error)
-	FindOrderByIDs(IDs []int) ([]Order, error)
+	FindOrderByIDs(IDs []int, d ...interface{}) ([]Order, error)
 }
 
 type repository struct {
@@ -35,7 +34,7 @@ func (r *repository) Create(order Order) (Order, error) {
 	}
 
 	// Create ORDER
-	query := "INSERT INTO `order` (product_id, cart_id, price, qty, customer_id) VALUES (?, ?, ?, ?, ?)"
+	query := "INSERT INTO `order` (product_id, cart_id, price, qty, customer_id, discount, price_discount) VALUES (?, ?, ?, ?, ?, ?, ?)"
 
 	stmt, err := tx.Prepare(query)
 	if err != nil {
@@ -43,7 +42,7 @@ func (r *repository) Create(order Order) (Order, error) {
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(order.ProductID, 0, order.Price, order.Qty, order.CustomerID)
+	res, err := stmt.Exec(order.ProductID, 0, order.Price, order.Qty, order.CustomerID, order.Discount, order.PriceDiscount)
 	if err != nil {
 		return createdOrder, err
 	}
@@ -69,7 +68,6 @@ func (r *repository) Create(order Order) (Order, error) {
 func (r *repository) UpdateQty(order Order) (Order, error) {
 	udpatedOrder := Order{}
 
-	fmt.Printf("%+v\n", order)
 	// Begin transaction
 	tx := r.db.MustBegin()
 
@@ -86,7 +84,6 @@ func (r *repository) UpdateQty(order Order) (Order, error) {
 	if err != nil {
 		return udpatedOrder, err
 	}
-	log.Println(udpatedOrder, "ORRR")
 
 	return udpatedOrder, nil
 }
@@ -94,7 +91,7 @@ func (r *repository) UpdateQty(order Order) (Order, error) {
 func (r *repository) FindOrderByID(ID int) (Order, error) {
 	var order Order
 	var orderScan OrderScan
-	err := r.db.Get(&orderScan, "SELECT id, product_id, cart_id, customer_id, price, qty, status, created_at, updated_at FROM `order` WHERE id = ?", ID)
+	err := r.db.Get(&orderScan, "SELECT * FROM `order` WHERE id = ?", ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return order, nil
@@ -105,11 +102,16 @@ func (r *repository) FindOrderByID(ID int) (Order, error) {
 	return order, nil
 }
 
-func (r *repository) FindOrderByIDs(IDs []int) ([]Order, error) {
+func (r *repository) FindOrderByIDs(IDs []int, d ...interface{}) ([]Order, error) {
 	var orders []Order
 	var orderScans []OrderScan
-	query := "SELECT id, product_id, cart_id, customer_id, price, qty, status, created_at, updated_at FROM `order` WHERE id IN (?) AND status = 'ACTIVE'"
+	query := "SELECT * FROM `order` WHERE id IN (?) AND status = 'ACTIVE'"
 	query, args, err := sqlx.In(query, IDs)
+	if len(d) > 0 {
+		query = "SELECT * FROM `order` WHERE id IN (?) AND status = ?"
+		query, args, err = sqlx.In(query, IDs, d[0])
+	}
+
 	if err != nil {
 		return orders, err
 	}
@@ -156,7 +158,7 @@ func (r *repository) GetOrderByProductAndCustomer(custID int, productID int) (Or
 	var orderScan OrderScan
 	var order Order
 
-	err := r.db.Get(&orderScan, "SELECT * FROM `order` WHERE customer_id = ? AND product_id = ?", custID, productID)
+	err := r.db.Get(&orderScan, "SELECT * FROM `order` WHERE customer_id = ? AND product_id = ? AND status = 'ACTIVE'", custID, productID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return order, nil
@@ -164,10 +166,7 @@ func (r *repository) GetOrderByProductAndCustomer(custID int, productID int) (Or
 		return order, err
 	}
 
-	fmt.Printf("%+v\n", orderScan)
-
 	order.FromScan(orderScan)
-	fmt.Printf("%+v\n", order)
 
 	return order, nil
 }

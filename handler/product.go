@@ -56,5 +56,5 @@ func (h *productHandler) ListProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, api.ResponseOKPagination(products, paginnation, "List products success"))
+	c.JSON(http.StatusOK, api.ResponseOKPagination(product.MarshalProducts(products), paginnation, "List products success"))
 }
